@@ -1,7 +1,7 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CharaterList} from '../../components/dragonball/charater-list/charater-list';
 import { AddCharacter } from '../../components/dragonball/add-character/add-character';
-import { Character } from '../../interfaces/character.interface';
+import { DragonBallService } from '../../services/dragonball.service';
 
 @Component({
   templateUrl: './dragonball-super.html',
@@ -10,23 +10,5 @@ import { Character } from '../../interfaces/character.interface';
 })
 
 export class DragonBallSuper {
-    characters = signal<Character[]>([
-        {id: 1, name: 'Goku', power: 9001},
-    ]);
-
-    addCharacter(newCharacter: Character) {
-        this.characters.update(characters => [...characters, newCharacter]);
-    }
-
-    /* powerClasses = computed(() => {
-        return this.characters().map(character => {
-            if (character.power > 9000) {
-                return 'text-success';
-            } else if (character.power > 6000) {
-                return 'text-warning';
-            } else {
-                return 'text-danger';
-            }
-        });
-    }); */
+    public dragonBallService = inject(DragonBallService);
 }
