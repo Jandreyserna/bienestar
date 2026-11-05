@@ -1,0 +1,14 @@
+{
+  "name": "bienestar-moral",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Despliegue de una sola app (Hostinger): la API Node.js sirve también el sitio Angular.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "build": "node scripts/build-produccion.mjs",
+    "start": "node server.js"
+  }
+}

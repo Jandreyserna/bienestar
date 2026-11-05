@@ -54,22 +54,44 @@ cd backend  && npm test        # dominio, casos de uso, API HTTP y Worker real (
 cd frontend && npx ng test --watch=false
 ```
 
-## Almacenamiento en Hostinger
+## Despliegue en Hostinger (una sola app)
 
-En producción los archivos se suben por FTP/FTPS a la carpeta pública del hosting:
+Producción corre como **una sola Node.js web app** (plan Business o Cloud) en `bienestarmoral.com`:
+la API atiende `/api` y `/uploads` y sirve también el sitio Angular compilado. Cada `git push` a `main`
+vuelve a compilar y publicar todo.
 
-```ini
-STORAGE_DRIVER=ftp
-FTP_HOST=ftp.tudominio.com
-FTP_USER=u123456789
-FTP_PASSWORD=********
-FTP_SECURE=true
-FTP_BASE_DIR=public_html/uploads
-PUBLIC_FILES_BASE_URL=https://tudominio.com/uploads
-```
+| Ajuste de la app (hPanel)  | Valor                         |
+| -------------------------- | ----------------------------- |
+| Directorio raíz            | `/` (raíz del repositorio)    |
+| Framework                  | Express (u Other)             |
+| Comando de build           | `npm run build`               |
+| Directorio de salida       | (vacío)                       |
+| Archivo de entrada         | `server.js`                   |
+| Node.js                    | 22 o 24                       |
 
-Las credenciales FTP están en hPanel → Archivos → Cuentas FTP. `FTP_BASE_DIR` es relativo al directorio
-inicial de la cuenta FTP y debe quedar dentro de `public_html` para que los archivos sean públicos.
+- `npm run build` en la raíz ([scripts/build-produccion.mjs](scripts/build-produccion.mjs)) instala y compila
+  backend y frontend, y deja solo lo necesario para producción (borra `frontend/node_modules` y las
+  dependencias de desarrollo del backend). No hace falta ejecutarlo en tu equipo.
+- Variables de entorno mínimas: `DB_HOST=localhost`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`,
+  `JWT_SECRET` (32+ caracteres), `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `TRUST_PROXY=true` y el almacenamiento:
+
+  ```ini
+  STORAGE_DRIVER=local
+  # Fuera de la carpeta de la app: Hostinger la reemplaza en cada despliegue
+  LOCAL_STORAGE_DIR=/home/u461260380/bienestar-archivos
+  PUBLIC_FILES_BASE_URL=https://bienestarmoral.com/uploads
+  ```
+
+- No definas `PORT` (lo asigna Hostinger) ni `NODE_ENV=production` (impediría instalar las herramientas de
+  compilación).
+- Registros: panel de la app → **Runtime Logs** (ejecución) y **Deployments** (build).
+- `backend/server.js` permite desplegar solo la API con directorio raíz `backend` (sin sitio).
+
+### Alternativa: archivos por FTP
+
+Si la API y el sitio se publican por separado, los archivos pueden subirse por FTP/FTPS a una carpeta
+pública del hosting (`STORAGE_DRIVER=ftp`, `FTP_HOST`, `FTP_USER`, `FTP_PASSWORD`, `FTP_SECURE=true`,
+`FTP_BASE_DIR` y `PUBLIC_FILES_BASE_URL`). Las credenciales están en hPanel → Archivos → Cuentas FTP.
 
 ## API
 

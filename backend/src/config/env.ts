@@ -1,15 +1,21 @@
 import { existsSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
 
 const MB = 1024 * 1024;
+
+/** Salida de `ng build` en el repositorio (desde src/config o dist/config sube a la raíz). */
+const DEFAULT_SITE_DIR = fileURLToPath(new URL('../../../frontend/dist/frontend/browser', import.meta.url));
 
 const EnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
   CORS_ORIGINS: z.string().default('http://localhost:4200'),
   TRUST_PROXY: z.stringbool().default(false),
+  /** Sitio Angular compilado que la API sirve en el mismo dominio (si la carpeta existe). */
+  SITE_DIR: z.string().optional(),
 
   DB_HOST: z.string().default('localhost'),
   DB_PORT: z.coerce.number().int().positive().default(3306),
@@ -65,7 +71,7 @@ export type StorageConfig =
 export interface AppConfig {
   env: 'development' | 'production' | 'test';
   port: number;
-  http: { corsOrigins: string[]; trustProxy: boolean };
+  http: { corsOrigins: string[]; trustProxy: boolean; siteDir: string };
   db: {
     host: string;
     port: number;
@@ -141,6 +147,7 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
         .map((origin) => origin.trim())
         .filter(Boolean),
       trustProxy: env.TRUST_PROXY,
+      siteDir: env.SITE_DIR ? path.resolve(env.SITE_DIR) : DEFAULT_SITE_DIR,
     },
     db: {
       host: env.DB_HOST,

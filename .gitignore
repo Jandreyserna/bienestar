@@ -10,3 +10,6 @@
 
 # Archivos subidos y caché de descargas del backend
 backend/storage/
+
+# Caché de descargas cuando la app corre desde la raíz (Hostinger)
+/storage/

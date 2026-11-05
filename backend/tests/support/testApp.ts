@@ -22,6 +22,8 @@ export function testConfig(overrides: Record<string, string> = {}): AppConfig {
     DB_NAME: 'test',
     JWT_SECRET: 'test-secret-de-al-menos-treinta-y-dos-caracteres',
     UPLOAD_TMP_DIR: path.join(os.tmpdir(), 'bm-test-uploads'),
+    // Sin sitio compilado por defecto: los tests de la API no dependen de `ng build`.
+    SITE_DIR: path.join(os.tmpdir(), 'bm-test-sin-sitio'),
     ...overrides,
   });
 }
@@ -39,9 +41,9 @@ export interface TestApp {
  * Mismo contenedor que producción, reemplazando solo los adaptadores de
  * infraestructura (MySQL y almacenamiento) por dobles en memoria.
  */
-export async function buildTestApp(): Promise<TestApp> {
+export async function buildTestApp(overrides: Record<string, string> = {}): Promise<TestApp> {
   const cacheDir = await mkdtemp(path.join(os.tmpdir(), 'bm-test-cache-'));
-  const container = buildContainer(testConfig({ DOWNLOAD_CACHE_DIR: cacheDir }));
+  const container = buildContainer(testConfig({ DOWNLOAD_CACHE_DIR: cacheDir, ...overrides }));
   const sections = new InMemorySectionRepository();
   const worksheets = new InMemoryWorksheetRepository();
   const storage = await FakeFileStorage.create();

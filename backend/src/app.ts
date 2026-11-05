@@ -1,5 +1,7 @@
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 import cors from 'cors';
-import express, { Router, type Express } from 'express';
+import express, { type Express, type RequestHandler, Router } from 'express';
 import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
 import type { AppContainer } from './container.js';
@@ -28,7 +30,21 @@ export function createApp(container: AppContainer): Express {
   app.set('trust proxy', config.http.trustProxy ? 1 : false);
 
   // Las imágenes las consume el frontend desde otro origen, por eso CORP cross-origin.
-  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      contentSecurityPolicy: {
+        directives: {
+          // Angular carga su CSS con onload="this.media='all'": se permite solo ese fragmento exacto.
+          'script-src-attr': ["'unsafe-hashes'", `'${STYLESHEET_ONLOAD_HASH}'`],
+          // Las secciones pueden usar imágenes de otros sitios (URL pegada en el panel).
+          'img-src': ["'self'", 'data:', 'https:'],
+          'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+          'font-src': ["'self'", 'data:', 'https://fonts.gstatic.com'],
+        },
+      },
+    }),
+  );
   app.use(cors({ origin: config.http.corsOrigins, exposedHeaders: ['Content-Disposition'] }));
   app.use(express.json({ limit: '1mb' }));
 
@@ -82,7 +98,41 @@ export function createApp(container: AppContainer): Express {
   api.use('/media', media);
 
   app.use('/api', api);
+
+  // Sitio público y panel (Angular compilado) en el mismo dominio que la API.
+  const siteDir = config.http.siteDir;
+  if (existsSync(path.join(siteDir, 'index.html'))) {
+    app.use(express.static(siteDir, { index: false, dotfiles: 'ignore', setHeaders: siteCacheHeaders }));
+    app.use(spaFallback(siteDir));
+    logger.info(`Sitio servido desde ${siteDir}`);
+  }
+
   app.use(notFoundHandler());
   app.use(errorHandler(logger));
   return app;
+}
+
+/** sha256 de "this.media='all'" (el onload con el que Angular carga su hoja de estilos). */
+const STYLESHEET_ONLOAD_HASH = 'sha256-MhtPZXr7+LpJUY5qtMutB+qWfQtMaPccfe7QXtCcEYc=';
+
+/** Archivos con hash en el nombre (main-AB12CD34.js) no cambian nunca; index.html siempre se revalida. */
+function siteCacheHeaders(res: express.Response, filePath: string): void {
+  const name = path.basename(filePath);
+  if (name === 'index.html') res.setHeader('Cache-Control', 'no-cache');
+  else if (/-[A-Z0-9]{8}\.(?:js|css)$/.test(name)) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  else res.setHeader('Cache-Control', 'public, max-age=86400');
+}
+
+/**
+ * Las rutas del sitio (/equipo, /admin/secciones...) las resuelve Angular: se responde index.html.
+ * No aplica a /api, /uploads ni a archivos inexistentes (con extensión), que siguen al 404 en JSON.
+ */
+function spaFallback(siteDir: string): RequestHandler {
+  return (req, res, next) => {
+    const isPage = req.method === 'GET' || req.method === 'HEAD';
+    const reserved = /^\/(?:api|uploads)(?:\/|$)/.test(req.path) || path.extname(req.path) !== '';
+    if (!isPage || reserved) return next();
+    res.setHeader('Cache-Control', 'no-cache');
+    res.sendFile('index.html', { root: siteDir });
+  };
 }
