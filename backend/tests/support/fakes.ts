@@ -7,7 +7,7 @@ import type { AdminUser, AdminUserRepository } from '../../src/modules/auth/doma
 import type { PageSlug } from '../../src/modules/site-content/domain/PageSlug.js';
 import type { Section, SectionSnapshot } from '../../src/modules/site-content/domain/Section.js';
 import { SectionFactory } from '../../src/modules/site-content/domain/SectionFactory.js';
-import type { SectionRepository } from '../../src/modules/site-content/domain/SectionRepository.js';
+import type { SectionRepository, SectionSummary } from '../../src/modules/site-content/domain/SectionRepository.js';
 import type { EducationLevel } from '../../src/modules/worksheets/domain/EducationLevel.js';
 import { Worksheet, type WorksheetSnapshot } from '../../src/modules/worksheets/domain/Worksheet.js';
 import type { WorksheetRepository } from '../../src/modules/worksheets/domain/WorksheetRepository.js';
@@ -30,6 +30,11 @@ export class InMemorySectionRepository implements SectionRepository {
   async findByPageAndKey(page: PageSlug, key: string): Promise<Section | null> {
     const row = [...this.rows.values()].find((r) => r.page === page && r.key === key);
     return row ? this.factory.reconstitute(structuredClone(row)) : null;
+  }
+  async findSummaries(): Promise<SectionSummary[]> {
+    return [...this.rows.values()]
+      .sort((a, b) => a.page.localeCompare(b.page) || a.position - b.position)
+      .map(({ page, key, title, position }) => ({ page, key, title, position }));
   }
   async save(section: Section): Promise<void> {
     this.rows.set(section.id, structuredClone(section.toSnapshot()));

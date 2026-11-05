@@ -2,19 +2,17 @@
   padding-block: 2rem;
 }
 
-/* --- Portada */
+/* ---------- Portada ---------- */
+
 .hero {
   position: relative;
   isolation: isolate;
-  display: flex;
-  align-items: flex-end;
-  min-height: min(82vh, 720px);
-  padding-block: clamp(64px, 10vw, 120px);
+  overflow: hidden;
   color: #fff;
   background:
-    radial-gradient(circle at 85% 20%, rgb(217 154 43 / 45%), transparent 45%),
-    linear-gradient(135deg, var(--bm-primary-strong), #2a8a72 60%, #3a7d6d);
-  overflow: hidden;
+    radial-gradient(circle at 85% 20%, rgb(249 233 59 / 22%), transparent 35%),
+    radial-gradient(circle at 70% 90%, rgb(5 210 143 / 22%), transparent 40%),
+    var(--bm-primary);
 }
 .hero-image {
   position: absolute;
@@ -23,55 +21,73 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 35%;
 }
-.hero.has-image::after {
+.hero.has-image::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(90deg, rgb(16 34 30 / 85%) 0%, rgb(16 34 30 / 55%) 50%, rgb(16 34 30 / 15%) 100%);
+  background: linear-gradient(
+    100deg,
+    rgb(32 21 110 / 95%) 0%,
+    rgb(45 31 145 / 86%) 42%,
+    rgb(45 31 145 / 35%) 100%
+  );
 }
 .hero-content {
-  max-width: 1160px;
+  padding-block: clamp(72px, 12vw, 150px);
 }
 .hero-content > * {
   max-width: 640px;
 }
-.hero .eyebrow {
-  color: #f5c76f;
+.hero-eyebrow {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 14%);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 .hero h1 {
-  margin-bottom: 0.3em;
+  margin-bottom: 0.2em;
+  color: #fff;
+  font-size: clamp(2.6rem, 6.4vw, 4.4rem);
 }
 .hero-subtitle {
   font-family: var(--bm-font-display);
-  font-size: clamp(1.25rem, 2.4vw, 1.6rem);
-  line-height: 1.3;
+  font-weight: 800;
+  font-size: clamp(1.3rem, 2.6vw, 1.75rem);
+  line-height: 1.25;
+  color: var(--bm-brand-yellow);
 }
 .hero-body {
-  color: rgb(255 255 255 / 85%);
-  font-size: 1.08rem;
+  font-size: 1.1rem;
+  color: rgb(255 255 255 / 90%);
 }
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin-top: 1.75rem;
+  margin-top: 2rem;
 }
 .btn-ghost.on-dark {
   color: #fff;
   border-color: rgb(255 255 255 / 55%);
 }
 .btn-ghost.on-dark:hover {
-  color: #fff;
-  border-color: #fff;
-  background: rgb(255 255 255 / 10%);
+  color: var(--bm-brand-yellow);
+  border-color: var(--bm-brand-yellow);
 }
 
-/* --- Fundadores */
-.founders {
-  background: var(--bm-surface);
-  border-block: 1px solid var(--bm-line);
+/* ---------- Encabezados ---------- */
+
+.section-heading .lead {
+  font-size: 1.1rem;
+  color: var(--bm-ink-soft);
 }
 .section-heading.centered {
   margin-inline: auto;
@@ -80,38 +96,51 @@
 .centered-text {
   text-align: center;
 }
+.more {
+  margin: 1.75rem 0 0;
+  font-weight: 700;
+}
+.more a {
+  text-decoration: none;
+}
+.more a:hover {
+  text-decoration: underline;
+}
 
-/* --- Misión y visión */
+/* ---------- Misión y visión ---------- */
+
 .purpose-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
 }
 .purpose {
+  position: relative;
   padding: clamp(1.5rem, 3vw, 2.25rem);
-  border-top: 4px solid var(--bm-accent);
+  border-top: 6px solid var(--bm-brand-red);
 }
-.purpose:nth-child(odd) {
-  border-top-color: var(--bm-primary);
+.purpose.second {
+  border-top-color: var(--bm-brand-green);
 }
 .purpose-icon {
-  display: inline-grid;
+  display: grid;
   place-items: center;
   width: 52px;
   height: 52px;
   margin-bottom: 1rem;
-  border-radius: 50%;
-  background: var(--bm-primary-soft);
-  color: var(--bm-primary);
+  border-radius: 14px;
+  background: var(--bm-red-soft);
+  color: var(--bm-red-text);
+}
+.purpose.second .purpose-icon {
+  background: var(--bm-green-soft);
+  color: var(--bm-green-text);
 }
 .purpose-icon svg {
   width: 28px;
   height: 28px;
 }
-.purpose h3 {
-  font-size: 1.5rem;
-}
-.purpose p {
-  margin: 0;
+.purpose app-rich-text {
   color: var(--bm-ink-soft);
+  font-size: 1.05rem;
 }

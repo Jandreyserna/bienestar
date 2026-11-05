@@ -16,11 +16,17 @@ export interface SectionDto {
   subtitle: string | null;
   body: string | null;
   imageUrl: string | null;
+  layout: string;
   position: number;
   isCore: boolean;
   items: SectionItemDto[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface NavigationPageDto {
+  page: string;
+  sections: { key: string; title: string }[];
 }
 
 export function toSectionDto(section: Section): SectionDto {
@@ -33,6 +39,7 @@ export function toSectionDto(section: Section): SectionDto {
     subtitle: snapshot.subtitle,
     body: snapshot.body,
     imageUrl: snapshot.imageUrl,
+    layout: snapshot.layout,
     position: snapshot.position,
     isCore: section.isCore,
     items: snapshot.items.map((item) => ({ ...item })),

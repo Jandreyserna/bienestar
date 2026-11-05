@@ -2,8 +2,19 @@
 
 Plataforma web de la organización **Bienestar Moral** con dos visuales:
 
-1. **Sitio público** (`/`, `/valores-humanos`): portada, historia, fundadores, misión y visión, y el catálogo de cartillas descargables separado en Primaria y Secundaria.
+1. **Sitio público**, con el logo y los colores de la marca y un menú con las secciones de cada página:
+
+   | Ruta               | Página             | Contenido                                                                     |
+   | ------------------ | ------------------ | ----------------------------------------------------------------------------- |
+   | `/`                | Inicio             | Portada, ¿qué es Bienestar Moral?, carrusel de historia, fundadores, misión y visión |
+   | `/quienes-somos`   | Quiénes somos      | Naturaleza jurídica y reseña histórica (línea de tiempo)                       |
+   | `/servicios`       | Servicios de apoyo | Refuerzo de valores en clase, talleres para estudiantes y para padres          |
+   | `/valores-humanos` | Valores humanos    | Banco de valores, valores por cubrir y cartillas por nivel (Preescolar, Primaria, Secundaria) |
+   | `/equipo`          | Equipo de trabajo  | Docentes misioneros, conferencistas, dirección y equipo de apoyo               |
+   | `/contacto`        | Contáctenos        | Datos de contacto (correo, WhatsApp, mapa) y representación legal              |
+
 2. **Panel de gestión** (`/admin`): edición de cada página y sus secciones, carga de imágenes y administración de cartillas.
+   Todo el contenido del sitio sale de la base de datos, así que cualquier texto, foto o sección se cambia desde aquí.
 
 | Carpeta     | Tecnología                                                                   |
 | ----------- | ---------------------------------------------------------------------------- |
@@ -67,10 +78,11 @@ Lectura pública; las escrituras requieren `Authorization: Bearer <token>`.
 | Método                | Ruta                            | Descripción                                    |
 | --------------------- | ------------------------------- | ---------------------------------------------- |
 | `POST`                | `/api/auth/login`               | Inicia sesión del administrador                |
-| `GET`                 | `/api/sections?page=home`       | Secciones de una página (`home`, `human-values`) |
+| `GET`                 | `/api/sections?page=home`       | Secciones de una página (`home`, `about`, `services`, `human-values`, `team`, `contact`) |
+| `GET`                 | `/api/navigation`               | Menú del sitio: secciones de cada página en orden |
 | `GET`                 | `/api/sections/:id`             | Una sección con sus elementos                  |
 | `POST` `PUT` `DELETE` | `/api/sections[/:id]`           | Crear, editar (incluye elementos) o eliminar   |
-| `GET`                 | `/api/worksheets?level=primary` | Cartillas (filtro opcional por nivel)          |
+| `GET`                 | `/api/worksheets?level=primary` | Cartillas (filtro opcional: `preschool`, `primary`, `secondary`) |
 | `GET`                 | `/api/worksheets/:id/download`  | Descarga directa de la cartilla                |
 | `POST` `PUT`          | `/api/worksheets[/:id]`         | Crear/editar cartilla (`multipart/form-data`)  |
 | `DELETE`              | `/api/worksheets/:id`           | Elimina la cartilla y su archivo               |
@@ -88,6 +100,7 @@ Todos los errores usan el mismo formato:
 | Requisito | Dónde está |
 | --- | --- |
 | RF-01.2 Inicio: portada, carrusel de historia, carrusel de fundadores, misión y visión | `frontend/src/app/public/home`, `public/components/carousel` |
+| Páginas del menú y secciones con diseño elegible | `public/content-page`, `public/components/section-block`, `public/layout` (menú) |
 | RF-01.3 Cartillas descargables en Primaria y Secundaria | `frontend/src/app/public/human-values`, `backend/src/modules/worksheets` |
 | RF-02.1 Gestión de secciones y contenidos | `frontend/src/app/admin/sections`, `backend/src/modules/site-content` |
 | RF-02.2 Carga de imágenes y cartillas a Hostinger | `admin/shared/image-field.ts`, `admin/worksheets`, `backend/src/modules/media` |
@@ -99,8 +112,33 @@ Todos los errores usan el mismo formato:
 | ARQ-05 Factory / Builder | `SectionFactory`, `Worksheet.builder()` |
 | ARQ-05 Strategy | `modules/media/infrastructure/storage` (`FtpStorageProvider`, `LocalStorageProvider`) |
 
+## Contenido y diseño de las secciones
+
+- El contenido inicial (textos de los documentos de Bienestar Moral) está en
+  `backend/src/modules/site-content/domain/defaultSections.ts`. Se crea al arrancar **solo si la sección no existe**,
+  así que nunca sobrescribe lo editado en el panel.
+- Las fotos iniciales (portada, historia, fundadores y equipo) están optimizadas en `frontend/public/contenido` y se
+  publican con el sitio. Al reemplazar una foto desde el panel, la nueva se sube al almacenamiento (Hostinger).
+- Logo, emblema y favicon: `frontend/public/marca`, `frontend/public/favicon.ico` y `apple-touch-icon.png`.
+- Cada página tiene una sección `intro` (encabezado) y secciones estructurales con diseño propio que se pueden editar
+  pero no eliminar. Las **secciones adicionales** que se creen eligen su diseño en el panel:
+
+  | Diseño          | Uso                                                                              |
+  | --------------- | -------------------------------------------------------------------------------- |
+  | Tarjetas        | Texto con imagen opcional y elementos en tarjetas                                 |
+  | Personas        | Foto circular, nombre y, en la descripción, cargo (1.ª línea) y formación          |
+  | Línea de tiempo | Etapas; el título «2001 – 2003 · Los comienzos» separa el periodo                  |
+  | Lista numerada  | Valores, talleres...                                                             |
+  | Etiquetas       | Palabras cortas (solo el título)                                                  |
+  | Datos de contacto | Correos, WhatsApp, teléfonos, direcciones (abren el mapa) y enlaces             |
+
+  Toda sección nueva aparece automáticamente en el menú de su página.
+- En los textos, una línea en blanco separa párrafos y las URLs y correos se vuelven enlaces.
+- Las cartillas (PDF) se suben desde el panel en cada entorno; en producción hay que cargarlas de nuevo para que
+  queden en Hostinger. En el banco de valores, cada valor enlaza a sus cartillas cuando el campo «valor humano»
+  coincide (p. ej. «La amistad»).
+
 ## Notas
 
-- Las secciones estructurales (portada, historia, fundadores, misión/visión e introducción de valores humanos) se pueden editar pero no eliminar; se pueden agregar secciones adicionales a cualquier página.
 - Al reemplazar o eliminar una cartilla se borra su archivo del hosting. Las imágenes reemplazadas en secciones **no** se borran automáticamente, porque la misma URL podría estar en uso en otra sección.
 - Las descargas se cachean en `backend/storage/cache` para no ir a Hostinger en cada petición.

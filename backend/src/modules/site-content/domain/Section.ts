@@ -4,12 +4,15 @@ import { optionalText, requiredText } from '../../../shared/domain/text.js';
 import { CORE_SECTION_KEYS, type PageSlug } from './PageSlug.js';
 import type { SectionKey } from './SectionKey.js';
 import { SectionItem, type SectionItemInput, type SectionItemSnapshot } from './SectionItem.js';
+import { type SectionLayout, toSectionLayout } from './SectionLayout.js';
 
 export interface SectionContent {
   title: string;
   subtitle?: string | null;
   body?: string | null;
   imageUrl?: string | null;
+  /** Diseño con el que el sitio presenta los elementos; si no se envía se conserva el actual. */
+  layout?: string;
   position?: number;
 }
 
@@ -21,6 +24,7 @@ export interface SectionSnapshot {
   subtitle: string | null;
   body: string | null;
   imageUrl: string | null;
+  layout: SectionLayout;
   position: number;
   items: SectionItemSnapshot[];
   createdAt: Date;
@@ -72,6 +76,7 @@ export class Section {
     this.state = {
       ...this.state,
       ...normalized,
+      layout: normalized.layout ?? this.state.layout,
       position: normalized.position ?? this.state.position,
       updatedAt: now,
     };
@@ -123,6 +128,7 @@ export class Section {
     subtitle: string | null;
     body: string | null;
     imageUrl: string | null;
+    layout: SectionLayout | undefined;
     position: number | undefined;
   } {
     if (content.position !== undefined && (!Number.isInteger(content.position) || content.position < 0)) {
@@ -133,6 +139,7 @@ export class Section {
       subtitle: optionalText(content.subtitle, 'subtitle', 300),
       body: optionalText(content.body, 'body', 5000),
       imageUrl: MediaUrl.optional(content.imageUrl)?.value ?? null,
+      layout: content.layout === undefined ? undefined : toSectionLayout(content.layout),
       position: content.position,
     };
   }

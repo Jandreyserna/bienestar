@@ -28,6 +28,7 @@ import { MediaController } from './modules/media/interface/http/MediaController.
 import {
   CreateSection,
   DeleteSection,
+  GetNavigation,
   GetPageSections,
   GetSection,
   SeedDefaultSections,
@@ -74,6 +75,7 @@ export interface Cradle {
   createSection: CreateSection;
   updateSection: UpdateSection;
   deleteSection: DeleteSection;
+  getNavigation: GetNavigation;
   seedDefaultSections: SeedDefaultSections;
   listWorksheets: ListWorksheets;
   getWorksheet: GetWorksheet;
@@ -132,6 +134,7 @@ export function buildContainer(config: AppConfig): AppContainer {
     createSection: asClass(CreateSection).singleton(),
     updateSection: asClass(UpdateSection).singleton(),
     deleteSection: asClass(DeleteSection).singleton(),
+    getNavigation: asClass(GetNavigation).singleton(),
     seedDefaultSections: asClass(SeedDefaultSections).singleton(),
     listWorksheets: asClass(ListWorksheets).singleton(),
     getWorksheet: asClass(GetWorksheet).singleton(),

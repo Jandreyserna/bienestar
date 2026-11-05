@@ -90,7 +90,8 @@ export class Carousel {
   protected initials(text: string): string {
     return text
       .split(/\s+/)
-      .filter((word) => /^\p{L}/u.test(word))
+      // Solo palabras con mayúscula inicial: "Fernando y María Elena" -> "FM"
+      .filter((word) => /^\p{Lu}/u.test(word))
       .slice(0, 2)
       .map((word) => word[0]!.toUpperCase())
       .join('');

@@ -117,7 +117,7 @@
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  background: #d3cbbb;
+  background: #cfcde3;
   transition: width 0.2s;
 }
 .dot.active::before {

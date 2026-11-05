@@ -47,7 +47,7 @@ import { type EducationLevel, LEVEL_LABELS, type Worksheet } from '../../core/mo
             <div class="info">
               <strong>{{ w.title }}</strong>
               <div class="tags">
-                <span class="badge" [class]="w.level === 'primary' ? 'badge-primary' : 'badge-secondary'">
+                <span class="badge" [class]="'badge-' + w.level">
                   {{ levelLabels[w.level] }}
                 </span>
                 <span class="badge">{{ w.humanValue }}</span>
@@ -73,19 +73,18 @@ import { type EducationLevel, LEVEL_LABELS, type Worksheet } from '../../core/mo
   `,
 })
 export class WorksheetsPage {
-  /** Query param ?nivel=primary|secondary */
+  /** Query param ?nivel=preschool|primary|secondary */
   readonly nivel = input<string>();
 
   private readonly api = inject(WorksheetsApi);
   protected readonly levelLabels = LEVEL_LABELS;
   protected readonly tabs: { label: string; value?: EducationLevel }[] = [
     { label: 'Todas' },
-    { label: 'Primaria', value: 'primary' },
-    { label: 'Secundaria', value: 'secondary' },
+    ...(Object.entries(LEVEL_LABELS) as [EducationLevel, string][]).map(([value, label]) => ({ label, value })),
   ];
   protected readonly level = computed<EducationLevel | undefined>(() => {
     const value = this.nivel();
-    return value === 'primary' || value === 'secondary' ? value : undefined;
+    return value && value in LEVEL_LABELS ? (value as EducationLevel) : undefined;
   });
   protected readonly worksheets = this.api.listResource(this.level);
   protected readonly list = computed<Worksheet[]>(() => (this.worksheets.hasValue() ? this.worksheets.value() : []));

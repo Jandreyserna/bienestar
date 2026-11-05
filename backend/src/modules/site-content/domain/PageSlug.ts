@@ -1,7 +1,7 @@
 import { ValidationError } from '../../../shared/domain/errors.js';
 
-/** Páginas públicas del sitio. */
-export const PAGE_SLUGS = ['home', 'human-values'] as const;
+/** Páginas públicas del sitio, en el orden del menú principal. */
+export const PAGE_SLUGS = ['home', 'about', 'services', 'human-values', 'team', 'contact'] as const;
 export type PageSlug = (typeof PAGE_SLUGS)[number];
 
 export function toPageSlug(value: string): PageSlug {
@@ -10,10 +10,15 @@ export function toPageSlug(value: string): PageSlug {
 }
 
 /**
- * Secciones estructurales de cada página. El sitio público depende de ellas,
- * por eso el dominio no permite eliminarlas (solo editarlas).
+ * Secciones estructurales de cada página. El sitio público tiene una presentación fija
+ * para ellas, por eso el dominio no permite eliminarlas (solo editarlas). "intro" es el
+ * encabezado de cada página interna.
  */
 export const CORE_SECTION_KEYS: Readonly<Record<PageSlug, readonly string[]>> = {
   home: ['hero', 'history', 'founders', 'mission-vision'],
-  'human-values': ['intro'],
+  about: ['intro'],
+  services: ['intro'],
+  'human-values': ['intro', 'worksheets'],
+  team: ['intro'],
+  contact: ['intro'],
 };

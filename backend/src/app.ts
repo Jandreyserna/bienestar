@@ -64,6 +64,7 @@ export function createApp(container: AppContainer): Express {
   sections.put('/:id', adminGuard, sectionController.update);
   sections.delete('/:id', adminGuard, sectionController.remove);
   api.use('/sections', sections);
+  api.get('/navigation', sectionController.navigation);
 
   // --- Cartillas de valores humanos. El guard va antes de la carga: un anónimo nunca sube nada.
   const worksheets = Router();

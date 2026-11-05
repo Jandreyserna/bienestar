@@ -71,9 +71,21 @@
 
       <div class="field">
         <label for="body">Texto <span class="muted">(opcional)</span></label>
-        <textarea id="body" formControlName="body" rows="4"></textarea>
-        <span class="hint">Los saltos de línea se respetan en el sitio.</span>
+        <textarea id="body" formControlName="body" rows="6"></textarea>
+        <span class="hint">Deja una línea en blanco entre párrafos. Las direcciones web y los correos se vuelven enlaces.</span>
       </div>
+
+      @if (!isCore()) {
+        <div class="field">
+          <label for="layout">Diseño en el sitio</label>
+          <select id="layout" formControlName="layout">
+            @for (layout of layouts; track layout.value) {
+              <option [value]="layout.value">{{ layout.label }}</option>
+            }
+          </select>
+          <span class="hint">{{ layoutHint() }}</span>
+        </div>
+      }
 
       @if (p.usesImage) {
         <app-image-field formControlName="imageUrl" label="Imagen de la sección" [hint]="p.imageHint" />
@@ -107,10 +119,15 @@
                 <span class="field-error">Este campo es obligatorio.</span>
               }
             </div>
-            <div class="field">
-              <label [for]="'item-desc-' + i">{{ p.itemDescriptionLabel }}</label>
-              <textarea [id]="'item-desc-' + i" formControlName="description" rows="3"></textarea>
-            </div>
+            @if (p.itemUsesDescription) {
+              <div class="field">
+                <label [for]="'item-desc-' + i">{{ p.itemDescriptionLabel }}</label>
+                <textarea [id]="'item-desc-' + i" formControlName="description" rows="4"></textarea>
+                @if (p.itemDescriptionHint) {
+                  <span class="hint">{{ p.itemDescriptionHint }}</span>
+                }
+              </div>
+            }
             @if (p.itemUsesImage) {
               <app-image-field formControlName="imageUrl" [label]="p.itemImageLabel" />
             }

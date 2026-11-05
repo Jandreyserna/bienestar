@@ -3,20 +3,44 @@
    ========================================================================== */
 
 :root {
-  --bm-ink: #1c2a28;
-  --bm-ink-soft: #4b5c59;
-  --bm-paper: #faf7f1;
+  /* Colores del logo de Bienestar Moral (corazón, figuras y libro) */
+  --bm-brand-navy: #2d1f91;
+  --bm-brand-red: #db3b3b;
+  --bm-brand-yellow: #f9e93b;
+  --bm-brand-green: #05d28f;
+  --bm-brand-blue: #2d8bff;
+  --bm-stripe: linear-gradient(
+    90deg,
+    var(--bm-brand-red) 0 25%,
+    var(--bm-brand-yellow) 25% 50%,
+    var(--bm-brand-green) 50% 75%,
+    var(--bm-brand-blue) 75% 100%
+  );
+
+  --bm-ink: #1b1840;
+  --bm-ink-soft: #4d4b6b;
+  --bm-paper: #f6f6fb;
   --bm-surface: #ffffff;
-  --bm-line: #e7e0d3;
-  --bm-primary: #1f6f5c;
-  --bm-primary-strong: #155244;
-  --bm-primary-soft: #e2f0ea;
-  --bm-accent: #d99a2b;
-  --bm-accent-soft: #fbefd8;
-  --bm-level-primary: #1f6f5c;
-  --bm-level-primary-soft: #e2f0ea;
-  --bm-level-secondary: #3a59a6;
-  --bm-level-secondary-soft: #e6ebf7;
+  --bm-line: #e3e2ef;
+  --bm-primary: #2d1f91;
+  --bm-primary-strong: #20156e;
+  --bm-primary-soft: #ebe9f8;
+  --bm-accent: #f9e93b;
+  --bm-accent-soft: #fdf8cf;
+  /* Variantes oscuras de la marca para texto sobre blanco (contraste AA) */
+  --bm-red-text: #c22f2f;
+  --bm-green-text: #08734f;
+  --bm-blue-text: #1c58b5;
+  --bm-red-soft: #fde8e8;
+  --bm-green-soft: #dcf7ec;
+  --bm-blue-soft: #e2edff;
+  --bm-yellow-soft: #fff8c4;
+  --bm-level-preschool: #6b5900;
+  --bm-level-preschool-soft: var(--bm-yellow-soft);
+  --bm-level-primary: var(--bm-green-text);
+  --bm-level-primary-soft: var(--bm-green-soft);
+  --bm-level-secondary: var(--bm-blue-text);
+  --bm-level-secondary-soft: var(--bm-blue-soft);
   --bm-danger: #b0402d;
   --bm-danger-soft: #fbe9e5;
   --bm-success: #2b7a4b;
@@ -24,10 +48,11 @@
 
   --bm-radius: 14px;
   --bm-radius-sm: 8px;
-  --bm-shadow: 0 1px 2px rgb(28 42 40 / 6%), 0 8px 24px rgb(28 42 40 / 7%);
-  --bm-font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --bm-shadow: 0 1px 2px rgb(27 24 64 / 6%), 0 8px 24px rgb(27 24 64 / 8%);
+  --bm-font-display: 'Nunito', 'Nunito Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --bm-font-body: 'Nunito Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --bm-gutter: clamp(16px, 4vw, 40px);
+  --bm-header-h: 76px;
 
   color-scheme: light;
 }
@@ -67,8 +92,9 @@ h1,
 h2,
 h3 {
   font-family: var(--bm-font-display);
-  font-weight: 650;
+  font-weight: 800;
   line-height: 1.15;
+  color: var(--bm-ink);
   margin: 0 0 0.5em;
   text-wrap: balance;
 }
@@ -92,7 +118,7 @@ a {
 }
 
 :focus-visible {
-  outline: 3px solid var(--bm-accent);
+  outline: 3px solid var(--bm-brand-blue);
   outline-offset: 2px;
 }
 
@@ -108,6 +134,9 @@ a {
 .page-section {
   padding-block: clamp(48px, 8vw, 96px);
 }
+.page-section.alt {
+  background: var(--bm-surface);
+}
 
 .section-heading {
   max-width: 680px;
@@ -120,8 +149,33 @@ a {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--bm-accent);
+  color: var(--bm-red-text);
   margin-bottom: 0.5rem;
+}
+
+/* Tonos suaves de la marca (rojo, amarillo, verde, azul) para etiquetas y chips */
+.tone-0 {
+  background: var(--bm-red-soft);
+  color: var(--bm-red-text);
+}
+.tone-1 {
+  background: var(--bm-yellow-soft);
+  color: var(--bm-level-preschool);
+}
+.tone-2 {
+  background: var(--bm-green-soft);
+  color: var(--bm-green-text);
+}
+.tone-3 {
+  background: var(--bm-blue-soft);
+  color: var(--bm-blue-text);
+}
+
+/* Franja con los cuatro colores del logo */
+.bm-stripe {
+  display: block;
+  height: 5px;
+  background: var(--bm-stripe);
 }
 
 .lead {
@@ -185,7 +239,10 @@ a {
 
 .btn-accent {
   background: var(--bm-accent);
-  color: var(--bm-ink);
+  color: var(--bm-primary-strong);
+}
+.btn-accent:hover:not(:disabled) {
+  background: #f3e01f;
 }
 
 .btn-ghost {
@@ -251,7 +308,11 @@ a {
   font-size: 0.78rem;
   font-weight: 700;
   background: var(--bm-accent-soft);
-  color: #7a5310;
+  color: #6b5900;
+}
+.badge-preschool {
+  background: var(--bm-level-preschool-soft);
+  color: var(--bm-level-preschool);
 }
 .badge-primary {
   background: var(--bm-level-primary-soft);
@@ -262,7 +323,7 @@ a {
   color: var(--bm-level-secondary);
 }
 .badge-neutral {
-  background: #efece6;
+  background: #ecebf4;
   color: var(--bm-ink-soft);
 }
 
@@ -284,8 +345,8 @@ a {
 }
 .alert-info {
   background: var(--bm-accent-soft);
-  border-color: #f1d9a8;
-  color: #6b4a0f;
+  border-color: #efe39a;
+  color: #5e5000;
 }
 
 .state {
@@ -296,7 +357,7 @@ a {
 
 .skeleton {
   border-radius: var(--bm-radius);
-  background: linear-gradient(90deg, #eee9df 0%, #f6f2ea 50%, #eee9df 100%);
+  background: linear-gradient(90deg, #ebeaf4 0%, #f5f4fa 50%, #ebeaf4 100%);
   background-size: 200% 100%;
   animation: bm-shimmer 1.4s infinite linear;
 }
@@ -342,7 +403,7 @@ a {
   width: 100%;
   min-height: 44px;
   padding: 0.6rem 0.8rem;
-  border: 1px solid #d8d0c1;
+  border: 1px solid #d3d1e4;
   border-radius: var(--bm-radius-sm);
   background: #fff;
   color: var(--bm-ink);
@@ -446,7 +507,7 @@ a {
   margin-bottom: 1.25rem;
   padding: 0.25rem;
   border-radius: 999px;
-  background: #eee8dc;
+  background: #e9e8f3;
 }
 .tabs a {
   padding: 0.45rem 1rem;
@@ -458,7 +519,7 @@ a {
 .tabs a.active {
   background: var(--bm-surface);
   color: var(--bm-ink);
-  box-shadow: 0 1px 3px rgb(28 42 40 / 12%);
+  box-shadow: 0 1px 3px rgb(27 24 64 / 12%);
 }
 
 .admin-list {

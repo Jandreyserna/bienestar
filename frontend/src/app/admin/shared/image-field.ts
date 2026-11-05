@@ -65,7 +65,7 @@ let nextId = 0;
   styles: `
     .box { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
     .preview { width: 140px; aspect-ratio: 4 / 3; border-radius: var(--bm-radius-sm); overflow: hidden;
-      background: #efe9de; display: grid; place-items: center; flex-shrink: 0; }
+      background: var(--bm-primary-soft); display: grid; place-items: center; flex-shrink: 0; }
     .preview img { width: 100%; height: 100%; object-fit: cover; }
     .empty { font-size: 0.8rem; color: var(--bm-ink-soft); }
     .controls { flex: 1; min-width: 220px; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }

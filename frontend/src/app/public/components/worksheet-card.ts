@@ -7,9 +7,9 @@ import type { Worksheet } from '../../core/models';
   selector: 'app-worksheet-card',
   template: `
     @let w = worksheet();
-    <article class="card worksheet">
+    <article class="card worksheet" [attr.data-level]="w.level">
       <div class="meta">
-        <span class="badge" [class]="w.level === 'primary' ? 'badge-primary' : 'badge-secondary'">
+        <span class="badge" [class]="'badge-' + w.level">
           {{ w.humanValue }}
         </span>
         <span class="file">{{ kind() }} · {{ size() }}</span>
@@ -27,7 +27,9 @@ import type { Worksheet } from '../../core/models';
   `,
   styles: `
     :host { display: block; }
-    .worksheet { height: 100%; display: flex; flex-direction: column; padding: 1.4rem; gap: 0.6rem; }
+    .worksheet { height: 100%; display: flex; flex-direction: column; padding: 1.4rem; gap: 0.6rem; border-top: 5px solid var(--bm-brand-green); }
+    .worksheet[data-level='preschool'] { border-top-color: var(--bm-brand-yellow); }
+    .worksheet[data-level='secondary'] { border-top-color: var(--bm-brand-blue); }
     .meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; }
     .file { font-size: 0.8rem; color: var(--bm-ink-soft); }
     h3 { margin: 0.25rem 0 0; }

@@ -2,13 +2,19 @@ import { HttpClient, httpResource } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
 import { API_CONFIG } from '../config/api-config';
-import type { NewSectionPayload, PageSlug, Section, SectionPayload } from '../models';
+import type { NavigationPage, NewSectionPayload, PageSlug, Section, SectionPayload } from '../models';
 
 /** Acceso a /api/sections. Las lecturas son recursos reactivos; las escrituras, Observables. */
 @Injectable({ providedIn: 'root' })
 export class SectionsApi {
   private readonly http = inject(HttpClient);
-  private readonly url = `${inject(API_CONFIG).baseUrl}/sections`;
+  private readonly baseUrl = inject(API_CONFIG).baseUrl;
+  private readonly url = `${this.baseUrl}/sections`;
+
+  /** Menú del sitio con las secciones de cada página. */
+  navigationResource() {
+    return httpResource<NavigationPage[]>(() => `${this.baseUrl}/navigation`, { defaultValue: [] });
+  }
 
   /** Secciones de una página. Debe llamarse en contexto de inyección (p. ej. al declarar un campo). */
   pageResource(page: () => PageSlug) {

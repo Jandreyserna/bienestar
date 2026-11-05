@@ -12,6 +12,7 @@ import { apiErrorMessage } from '../../core/http/api-error';
     <main class="login">
       <form class="card login-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
         <a routerLink="/" class="back">← Volver al sitio</a>
+        <img class="logo" src="/marca/logo-bienestar-moral.png" alt="Bienestar Moral · Fundación Semillas" width="120" height="120" />
         <h1>Panel de administración</h1>
         <p class="muted">Bienestar Moral</p>
 
@@ -40,8 +41,10 @@ import { apiErrorMessage } from '../../core/http/api-error';
     .login { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem var(--bm-gutter);
       background: radial-gradient(circle at 20% 10%, var(--bm-primary-soft), transparent 50%),
                   radial-gradient(circle at 90% 90%, var(--bm-accent-soft), transparent 45%); }
-    .login-card { width: min(100%, 420px); padding: 2rem; }
-    h1 { font-size: 1.7rem; margin: 1rem 0 0.25rem; }
+    .login-card { width: min(100%, 420px); padding: 2rem; border-top: 5px solid var(--bm-brand-yellow); }
+    .logo { display: block; margin: 0.75rem auto 0; }
+    h1 { font-size: 1.7rem; margin: 0.75rem 0 0.25rem; text-align: center; }
+    h1 + .muted { text-align: center; }
     .back { font-size: 0.9rem; text-decoration: none; }
     .btn { width: 100%; }
   `,

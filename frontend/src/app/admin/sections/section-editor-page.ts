@@ -1,4 +1,5 @@
 import { Component, type OnInit, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   type FormControl,
   type FormGroup,
@@ -10,7 +11,15 @@ import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { SectionsApi } from '../../core/api/sections-api';
 import { apiErrorMessage } from '../../core/http/api-error';
-import { PAGES, type PageSlug, type Section, type SectionItem, type SectionPayload } from '../../core/models';
+import {
+  PAGES,
+  type PageSlug,
+  SECTION_LAYOUTS,
+  type Section,
+  type SectionItem,
+  type SectionLayout,
+  type SectionPayload,
+} from '../../core/models';
 import { ImageField } from '../shared/image-field';
 import { profileFor } from './section-profiles';
 
@@ -42,13 +51,15 @@ export class SectionEditorPage implements OnInit {
   private readonly fb = inject(NonNullableFormBuilder);
 
   protected readonly pages = PAGES;
+  protected readonly layouts = SECTION_LAYOUTS;
   protected readonly maxItems = MAX_ITEMS;
   protected readonly section = this.api.sectionResource(() => this.id());
   protected readonly isNew = computed(() => !this.id());
   protected readonly loaded = computed<Section | undefined>(() =>
     this.section.hasValue() ? this.section.value() : undefined,
   );
-  protected readonly profile = computed(() => profileFor(this.loaded()?.key));
+  /** Las secciones estructurales tienen diseño fijo; las demás eligen cómo se presentan. */
+  protected readonly isCore = computed(() => this.loaded()?.isCore ?? false);
   protected readonly saving = signal(false);
   protected readonly notice = signal<{ type: 'success' | 'error'; text: string } | null>(
     (history.state as { flash?: string } | null)?.flash
@@ -63,9 +74,18 @@ export class SectionEditorPage implements OnInit {
     subtitle: this.fb.control('', Validators.maxLength(300)),
     body: this.fb.control('', Validators.maxLength(5000)),
     imageUrl: this.fb.control(''),
+    layout: this.fb.control<SectionLayout>('cards'),
     position: this.fb.control<number | null>(null, Validators.min(0)),
     items: this.fb.array<ItemForm>([]),
   });
+
+  private readonly layoutValue = toSignal(this.form.controls.layout.valueChanges, {
+    initialValue: this.form.controls.layout.value,
+  });
+  protected readonly profile = computed(() => profileFor(this.loaded(), this.layoutValue()));
+  protected readonly layoutHint = computed(
+    () => this.layouts.find((layout) => layout.value === this.layoutValue())?.hint ?? '',
+  );
 
   constructor() {
     // Cuando llega (o se actualiza) la sección desde la API, se vuelca en el formulario.
@@ -77,7 +97,8 @@ export class SectionEditorPage implements OnInit {
 
   ngOnInit(): void {
     if (this.isNew()) {
-      this.form.controls.page.setValue(this.pagina() === 'human-values' ? 'human-values' : 'home');
+      const requested = PAGES.find((page) => page.slug === this.pagina());
+      this.form.controls.page.setValue(requested?.slug ?? 'home');
     }
   }
 
@@ -121,6 +142,7 @@ export class SectionEditorPage implements OnInit {
       subtitle: v.subtitle || null,
       body: v.body || null,
       imageUrl: v.imageUrl || null,
+      ...(this.isCore() ? {} : { layout: v.layout }),
       ...(v.position !== null ? { position: v.position } : {}),
       ...(this.profile().usesItems
         ? {
@@ -167,6 +189,7 @@ export class SectionEditorPage implements OnInit {
       subtitle: section.subtitle ?? '',
       body: section.body ?? '',
       imageUrl: section.imageUrl ?? '',
+      layout: section.layout,
       position: section.position,
     });
     this.items.clear();

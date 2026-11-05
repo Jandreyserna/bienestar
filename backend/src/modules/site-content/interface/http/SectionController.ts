@@ -4,6 +4,7 @@ import { idParamSchema, parseInput } from '../../../../shared/infrastructure/htt
 import type {
   CreateSection,
   DeleteSection,
+  GetNavigation,
   GetPageSections,
   GetSection,
   UpdateSection,
@@ -23,6 +24,7 @@ const contentSchema = {
   subtitle: nullableText,
   body: nullableText,
   imageUrl: nullableText,
+  layout: z.string().optional(),
   position: z.number().int().min(0).optional(),
   items: z.array(itemSchema).optional(),
 };
@@ -39,7 +41,12 @@ export class SectionController {
     private readonly createSection: CreateSection,
     private readonly updateSection: UpdateSection,
     private readonly deleteSection: DeleteSection,
+    private readonly getNavigation: GetNavigation,
   ) {}
+
+  navigation = async (_req: Request, res: Response): Promise<void> => {
+    res.json(await this.getNavigation.execute());
+  };
 
   list = async (req: Request, res: Response): Promise<void> => {
     const { page } = parseInput(listQuerySchema, req.query);

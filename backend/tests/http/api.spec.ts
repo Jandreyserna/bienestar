@@ -43,7 +43,67 @@ describe('API HTTP', () => {
     it('la página de inicio trae las secciones iniciales en orden', async () => {
       const res = await request(t.app).get('/api/sections?page=home');
       expect(res.status).toBe(200);
-      expect(res.body.map((s: { key: string }) => s.key)).toEqual(['hero', 'history', 'founders', 'mission-vision']);
+      expect(res.body.map((s: { key: string }) => s.key)).toEqual([
+        'hero',
+        'overview',
+        'history',
+        'founders',
+        'mission-vision',
+      ]);
+    });
+
+    it('cada página del menú tiene su contenido inicial', async () => {
+      for (const page of ['about', 'services', 'human-values', 'team', 'contact']) {
+        const res = await request(t.app).get(`/api/sections?page=${page}`);
+        expect(res.status).toBe(200);
+        expect(res.body[0].key).toBe('intro');
+        expect(res.body.length).toBeGreaterThan(1);
+      }
+    });
+
+    it('el menú lista las secciones de cada página, sin encabezados', async () => {
+      const res = await request(t.app).get('/api/navigation');
+      expect(res.status).toBe(200);
+      expect(res.body.map((p: { page: string }) => p.page)).toEqual([
+        'home',
+        'about',
+        'services',
+        'human-values',
+        'team',
+        'contact',
+      ]);
+      const home = res.body[0].sections.map((s: { key: string }) => s.key);
+      expect(home).toEqual(['overview', 'history', 'founders', 'mission-vision']);
+      const values = res.body[3].sections.map((s: { key: string }) => s.key);
+      expect(values).toEqual(['value-bank', 'more-values', 'worksheets']);
+    });
+
+    it('guarda el diseño elegido y rechaza diseños desconocidos', async () => {
+      const created = await request(t.app)
+        .post('/api/sections')
+        .set(auth())
+        .send({ page: 'team', key: 'voluntarios', title: 'Voluntarios', layout: 'people', items: [{ title: 'Ana' }] });
+      expect(created.status).toBe(201);
+      expect(created.body.layout).toBe('people');
+
+      const kept = await request(t.app)
+        .put(`/api/sections/${created.body.id}`)
+        .set(auth())
+        .send({ title: 'Voluntariado' });
+      expect(kept.body.layout).toBe('people');
+
+      const invalid = await request(t.app)
+        .put(`/api/sections/${created.body.id}`)
+        .set(auth())
+        .send({ title: 'Voluntariado', layout: 'carrusel-3d' });
+      expect(invalid.status).toBe(400);
+      expect(invalid.body.error.details.fields[0].field).toBe('layout');
+
+      const menu = await request(t.app).get('/api/navigation');
+      const team = menu.body.find((p: { page: string }) => p.page === 'team');
+      expect(team.sections.at(-1)).toEqual({ key: 'voluntarios', title: 'Voluntariado' });
+
+      await request(t.app).delete(`/api/sections/${created.body.id}`).set(auth());
     });
 
     it('valida la página solicitada', async () => {
@@ -79,7 +139,8 @@ describe('API HTTP', () => {
         .set(auth())
         .send({ page: 'home', key: 'aliados', title: 'Aliados' });
       expect(created.status).toBe(201);
-      expect(created.body.position).toBe(4);
+      expect(created.body.position).toBe(5);
+      expect(created.body.layout).toBe('cards');
 
       const duplicated = await request(t.app)
         .post('/api/sections')
@@ -111,6 +172,10 @@ describe('API HTTP', () => {
         .attach('file', pdf, { filename: 'Cartilla Educación.pdf', contentType: 'application/pdf' });
       expect(created.status).toBe(201);
       expect(created.body.file).toMatchObject({ name: 'Cartilla Educación.pdf', mimeType: 'application/pdf' });
+
+      const preschool = await request(t.app).get('/api/worksheets?level=preschool');
+      expect(preschool.status).toBe(200);
+      expect(preschool.body).toHaveLength(0);
 
       const primary = await request(t.app).get('/api/worksheets?level=primary');
       const secondary = await request(t.app).get('/api/worksheets?level=secondary');

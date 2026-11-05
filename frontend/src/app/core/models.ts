@@ -1,11 +1,38 @@
 /** Tipos compartidos que reflejan los DTO de la API. */
 
-export type PageSlug = 'home' | 'human-values';
+export type PageSlug = 'home' | 'about' | 'services' | 'human-values' | 'team' | 'contact';
 
-export const PAGES: readonly { slug: PageSlug; label: string; route: string }[] = [
-  { slug: 'home', label: 'Inicio', route: '/' },
-  { slug: 'human-values', label: 'Valores humanos', route: '/valores-humanos' },
+/** Páginas del sitio en el orden del menú principal (`short`: etiqueta de la barra superior). */
+export const PAGES: readonly { slug: PageSlug; label: string; short: string; route: string }[] = [
+  { slug: 'home', label: 'Inicio', short: 'Inicio', route: '/' },
+  { slug: 'about', label: 'Quiénes somos', short: 'Quiénes somos', route: '/quienes-somos' },
+  { slug: 'services', label: 'Servicios de apoyo', short: 'Servicios', route: '/servicios' },
+  { slug: 'human-values', label: 'Valores humanos', short: 'Valores humanos', route: '/valores-humanos' },
+  { slug: 'team', label: 'Equipo de trabajo', short: 'Equipo', route: '/equipo' },
+  { slug: 'contact', label: 'Contáctenos', short: 'Contáctenos', route: '/contacto' },
 ];
+
+export function pageRoute(slug: PageSlug): string {
+  return PAGES.find((p) => p.slug === slug)?.route ?? '/';
+}
+
+/** Cómo presenta el sitio los elementos de una sección no estructural. */
+export type SectionLayout = 'cards' | 'people' | 'timeline' | 'numbered' | 'tags' | 'contact';
+
+export const SECTION_LAYOUTS: readonly { value: SectionLayout; label: string; hint: string }[] = [
+  { value: 'cards', label: 'Tarjetas', hint: 'Texto con imagen opcional y elementos en tarjetas.' },
+  { value: 'people', label: 'Personas', hint: 'Foto circular, nombre y cargo o formación.' },
+  { value: 'timeline', label: 'Línea de tiempo', hint: 'Etapas en orden cronológico, con imagen opcional.' },
+  { value: 'numbered', label: 'Lista numerada', hint: 'Elementos numerados con su descripción (valores, talleres...).' },
+  { value: 'tags', label: 'Etiquetas', hint: 'Palabras o frases cortas (solo el título de cada elemento).' },
+  { value: 'contact', label: 'Datos de contacto', hint: 'Correos, teléfonos, direcciones y enlaces con acceso directo.' },
+];
+
+/** Menú del sitio: secciones de cada página (GET /api/navigation). */
+export interface NavigationPage {
+  page: PageSlug;
+  sections: { key: string; title: string }[];
+}
 
 export interface SectionItem {
   id: string;
@@ -23,6 +50,7 @@ export interface Section {
   subtitle: string | null;
   body: string | null;
   imageUrl: string | null;
+  layout: SectionLayout;
   position: number;
   isCore: boolean;
   items: SectionItem[];
@@ -42,6 +70,7 @@ export interface SectionPayload {
   subtitle: string | null;
   body: string | null;
   imageUrl: string | null;
+  layout?: SectionLayout;
   position?: number;
   /** Si se envía, reemplaza todos los items en ese orden. */
   items?: SectionItemPayload[];
@@ -52,9 +81,10 @@ export interface NewSectionPayload extends SectionPayload {
   key: string;
 }
 
-export type EducationLevel = 'primary' | 'secondary';
+export type EducationLevel = 'preschool' | 'primary' | 'secondary';
 
 export const LEVEL_LABELS: Readonly<Record<EducationLevel, string>> = {
+  preschool: 'Preescolar',
   primary: 'Primaria',
   secondary: 'Secundaria',
 };

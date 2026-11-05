@@ -3,6 +3,7 @@ import type { PageSlug } from './PageSlug.js';
 import { Section, type SectionContent, type SectionItemDraft, type SectionSnapshot } from './Section.js';
 import { SectionItem } from './SectionItem.js';
 import { SectionKey } from './SectionKey.js';
+import { DEFAULT_SECTION_LAYOUT } from './SectionLayout.js';
 
 export interface NewSectionInput extends SectionContent {
   page: PageSlug;
@@ -24,6 +25,7 @@ export class SectionFactory {
       page: input.page,
       key: SectionKey.from(input.key),
       ...content,
+      layout: content.layout ?? DEFAULT_SECTION_LAYOUT,
       position: content.position ?? defaultPosition,
       items: [],
       createdAt: now,

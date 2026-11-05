@@ -3,7 +3,7 @@ import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { SectionsApi } from '../../core/api/sections-api';
 import { apiErrorMessage } from '../../core/http/api-error';
-import { PAGES, type PageSlug, type Section } from '../../core/models';
+import { PAGES, type PageSlug, SECTION_LAYOUTS, type Section } from '../../core/models';
 
 /** RF-02.1: listado de secciones por página. */
 @Component({
@@ -48,12 +48,18 @@ import { PAGES, type PageSlug, type Section } from '../../core/models';
                 @if (section.isCore) {
                   <span class="badge badge-neutral" title="Forma parte de la estructura de la página">Estructural</span>
                 }
+                @if (!section.isCore) {
+                  <span class="badge badge-primary">Diseño: {{ layoutLabel(section.layout) }}</span>
+                }
                 @if (section.items.length) {
                   <span class="badge">{{ section.items.length }} elemento(s)</span>
                 }
               </div>
             </div>
             <div class="actions">
+              <a class="btn btn-ghost btn-sm" [routerLink]="pageRoute()" [fragment]="section.key" target="_blank">
+                Ver en el sitio
+              </a>
               <a class="btn btn-ghost btn-sm" [routerLink]="[section.id]">Editar</a>
               @if (!section.isCore) {
                 <button class="btn btn-danger btn-sm" type="button" [disabled]="deleting() === section.id"
@@ -77,15 +83,20 @@ import { PAGES, type PageSlug, type Section } from '../../core/models';
   `,
 })
 export class SectionsPage {
-  /** Query param ?pagina=home|human-values */
+  /** Query param ?pagina=home|about|services|human-values|team|contact */
   readonly pagina = input<string>();
 
   private readonly api = inject(SectionsApi);
   protected readonly pages = PAGES;
-  protected readonly page = computed<PageSlug>(() => (this.pagina() === 'human-values' ? 'human-values' : 'home'));
+  protected readonly page = computed<PageSlug>(() => PAGES.find((p) => p.slug === this.pagina())?.slug ?? 'home');
+  protected readonly pageRoute = computed(() => PAGES.find((p) => p.slug === this.page())?.route ?? '/');
   protected readonly sections = this.api.pageResource(this.page);
   protected readonly list = computed<Section[]>(() => (this.sections.hasValue() ? this.sections.value() : []));
   protected readonly deleting = signal<string | null>(null);
+
+  protected layoutLabel(layout: string): string {
+    return SECTION_LAYOUTS.find((l) => l.value === layout)?.label ?? layout;
+  }
   protected readonly error = signal<string | null>(null);
 
   protected remove(section: Section): void {

@@ -68,7 +68,7 @@ export class WorksheetFormPage implements OnInit {
 
   ngOnInit(): void {
     const level = this.nivel();
-    if (this.isNew() && (level === 'primary' || level === 'secondary')) this.form.controls.level.setValue(level);
+    if (this.isNew() && level && level in LEVEL_LABELS) this.form.controls.level.setValue(level as EducationLevel);
   }
 
   protected invalid(name: keyof typeof this.form.controls): boolean {

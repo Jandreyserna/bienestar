@@ -35,7 +35,7 @@
   padding: 1.25rem;
   border: 1px solid var(--bm-line);
   border-radius: var(--bm-radius-sm);
-  background: #fdfbf7;
+  background: #fafafd;
 }
 .item legend {
   padding-inline: 0.4rem;

@@ -1,12 +1,12 @@
 import { ConflictError, NotFoundError } from '../../../shared/domain/errors.js';
 import type { Logger } from '../../../shared/application/ports/Logger.js';
-import { toPageSlug } from '../domain/PageSlug.js';
+import { PAGE_SLUGS, toPageSlug } from '../domain/PageSlug.js';
 import type { SectionContent, SectionItemDraft } from '../domain/Section.js';
 import type { NewSectionInput, SectionFactory } from '../domain/SectionFactory.js';
 import { SectionKey } from '../domain/SectionKey.js';
 import type { SectionRepository } from '../domain/SectionRepository.js';
 import { DEFAULT_SECTIONS } from '../domain/defaultSections.js';
-import { toSectionDto, type SectionDto } from './SectionDto.js';
+import { type NavigationPageDto, toSectionDto, type SectionDto } from './SectionDto.js';
 
 /** Casos de uso del contenido de las páginas (RF-01.2, RF-02.1). */
 
@@ -16,6 +16,28 @@ export class GetPageSections {
   async execute(page: string): Promise<SectionDto[]> {
     const sections = await this.sectionRepository.findByPage(toPageSlug(page));
     return sections.map(toSectionDto);
+  }
+}
+
+/**
+ * Menú del sitio: las secciones de cada página en orden. Las secciones que el administrador
+ * agrega aparecen automáticamente. Se omiten los encabezados de página (portada e "intro"),
+ * que no son destinos útiles dentro del menú.
+ */
+export class GetNavigation {
+  private static readonly HEADER_KEYS = new Set(['hero', 'intro']);
+
+  constructor(private readonly sectionRepository: SectionRepository) {}
+
+  async execute(): Promise<NavigationPageDto[]> {
+    const summaries = await this.sectionRepository.findSummaries();
+    return PAGE_SLUGS.map((page) => ({
+      page,
+      sections: summaries
+        .filter((s) => s.page === page && !GetNavigation.HEADER_KEYS.has(s.key))
+        .sort((a, b) => a.position - b.position)
+        .map(({ key, title }) => ({ key, title })),
+    }));
   }
 }
 

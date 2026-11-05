@@ -62,4 +62,12 @@ export const migrations: Migration[] = [
       ) ${TABLE_OPTIONS}`,
     ],
   },
+  {
+    // Diseño elegible por sección, nuevas páginas del menú y cartillas de preescolar.
+    name: '002_section_layout_and_preschool',
+    statements: [
+      `ALTER TABLE sections ADD COLUMN layout VARCHAR(30) NOT NULL DEFAULT 'cards' AFTER image_url`,
+      `ALTER TABLE worksheets MODIFY COLUMN level ENUM('preschool', 'primary', 'secondary') NOT NULL`,
+    ],
+  },
 ];

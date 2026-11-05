@@ -6,7 +6,8 @@ import {
 import type { PageSlug } from '../domain/PageSlug.js';
 import type { Section, SectionSnapshot } from '../domain/Section.js';
 import type { SectionFactory } from '../domain/SectionFactory.js';
-import type { SectionRepository } from '../domain/SectionRepository.js';
+import type { SectionLayout } from '../domain/SectionLayout.js';
+import type { SectionRepository, SectionSummary } from '../domain/SectionRepository.js';
 
 interface SectionRow {
   id: string;
@@ -16,6 +17,7 @@ interface SectionRow {
   subtitle: string | null;
   body: string | null;
   image_url: string | null;
+  layout: SectionLayout;
   position: number;
   created_at: Date;
   updated_at: Date;
@@ -60,6 +62,13 @@ export class MySqlSectionRepository implements SectionRepository {
     return section ?? null;
   }
 
+  async findSummaries(): Promise<SectionSummary[]> {
+    const rows = await this.database.query<Pick<SectionRow, 'page' | 'section_key' | 'title' | 'position'>>(
+      'SELECT page, section_key, title, position FROM sections ORDER BY page, position, created_at',
+    );
+    return rows.map((row) => ({ page: row.page, key: row.section_key, title: row.title, position: row.position }));
+  }
+
   async save(section: Section): Promise<void> {
     const s = section.toSnapshot();
     try {
@@ -70,16 +79,19 @@ export class MySqlSectionRepository implements SectionRepository {
         if (existing.length === 0) {
           await tx.execute(
             `INSERT INTO sections
-               (id, page, section_key, title, subtitle, body, image_url, position, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [s.id, s.page, s.key, s.title, s.subtitle, s.body, s.imageUrl, s.position, s.createdAt, s.updatedAt],
+               (id, page, section_key, title, subtitle, body, image_url, layout, position, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              s.id, s.page, s.key, s.title, s.subtitle, s.body, s.imageUrl, s.layout, s.position, s.createdAt,
+              s.updatedAt,
+            ],
           );
         } else {
           await tx.execute(
             `UPDATE sections
-               SET title = ?, subtitle = ?, body = ?, image_url = ?, position = ?, updated_at = ?
+               SET title = ?, subtitle = ?, body = ?, image_url = ?, layout = ?, position = ?, updated_at = ?
              WHERE id = ?`,
-            [s.title, s.subtitle, s.body, s.imageUrl, s.position, s.updatedAt, s.id],
+            [s.title, s.subtitle, s.body, s.imageUrl, s.layout, s.position, s.updatedAt, s.id],
           );
         }
         await tx.execute('DELETE FROM section_items WHERE section_id = ?', [s.id]);
@@ -117,6 +129,7 @@ export class MySqlSectionRepository implements SectionRepository {
         subtitle: row.subtitle,
         body: row.body,
         imageUrl: row.image_url,
+        layout: row.layout,
         position: row.position,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
