@@ -8,7 +8,8 @@
   },
   "scripts": {
     "dev": "tsx watch src/main.ts",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && node scripts/build-sitio.mjs",
+    "build:api": "tsc -p tsconfig.build.json",
     "start": "node dist/main.js",
     "migrate": "tsx src/shared/infrastructure/database/migrate.cli.ts",
     "typecheck": "tsc --noEmit",

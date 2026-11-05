@@ -5,7 +5,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src
-RUN npm run build && npm prune --omit=dev
+RUN npm run build:api && npm prune --omit=dev
 
 # --- Imagen final (solo JS compilado y dependencias de producción)
 FROM node:24-alpine

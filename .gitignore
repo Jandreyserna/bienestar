@@ -11,5 +11,8 @@
 # Archivos subidos y caché de descargas del backend
 backend/storage/
 
+# Sitio compilado que sirve la API en producción (lo genera npm run build)
+backend/sitio/
+
 # Caché de descargas cuando la app corre desde la raíz (Hostinger)
 /storage/

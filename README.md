@@ -62,16 +62,20 @@ vuelve a compilar y publicar todo.
 
 | Ajuste de la app (hPanel)  | Valor                         |
 | -------------------------- | ----------------------------- |
-| Directorio raíz            | `/` (raíz del repositorio)    |
-| Framework                  | Express (u Other)             |
+| Directorio raíz            | `backend`                     |
+| Framework                  | Express                       |
 | Comando de build           | `npm run build`               |
 | Directorio de salida       | (vacío)                       |
-| Archivo de entrada         | `server.js`                   |
+| Archivo de entrada         | `server.js` (`backend/server.js`) |
 | Node.js                    | 22 o 24                       |
 
-- `npm run build` en la raíz ([scripts/build-produccion.mjs](scripts/build-produccion.mjs)) instala y compila
-  backend y frontend, y deja solo lo necesario para producción (borra `frontend/node_modules` y las
-  dependencias de desarrollo del backend). No hace falta ejecutarlo en tu equipo.
+- `npm run build` del backend compila la API (`dist/`) y, con
+  [backend/scripts/build-sitio.mjs](backend/scripts/build-sitio.mjs), el sitio Angular dentro de `backend/sitio`,
+  la carpeta que publica Hostinger. Instala las dependencias del frontend solo para compilar y luego las borra.
+  En el registro del build debe aparecer `[sitio] Sitio listo`; si dice que no encontró el frontend, se publicó
+  solo la API. Para compilar únicamente la API usa `npm run build:api` (lo hace el Dockerfile).
+- Si la app se crea con la raíz del repositorio como directorio raíz, el `package.json`, `server.js` y
+  [scripts/build-produccion.mjs](scripts/build-produccion.mjs) de la raíz hacen lo mismo.
 - Variables de entorno mínimas: `DB_HOST=localhost`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`,
   `JWT_SECRET` (32+ caracteres), `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `TRUST_PROXY=true` y el almacenamiento:
 
@@ -85,7 +89,6 @@ vuelve a compilar y publicar todo.
 - No definas `PORT` (lo asigna Hostinger) ni `NODE_ENV=production` (impediría instalar las herramientas de
   compilación).
 - Registros: panel de la app → **Runtime Logs** (ejecución) y **Deployments** (build).
-- `backend/server.js` permite desplegar solo la API con directorio raíz `backend` (sin sitio).
 
 ### Alternativa: archivos por FTP
 

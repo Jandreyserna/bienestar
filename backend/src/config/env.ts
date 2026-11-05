@@ -6,8 +6,14 @@ import { z } from 'zod';
 
 const MB = 1024 * 1024;
 
-/** Salida de `ng build` en el repositorio (desde src/config o dist/config sube a la raíz). */
-const DEFAULT_SITE_DIR = fileURLToPath(new URL('../../../frontend/dist/frontend/browser', import.meta.url));
+/**
+ * Sitio Angular compilado. En producción `npm run build` lo deja en backend/sitio (la carpeta que publica
+ * Hostinger); en desarrollo sirve también la salida normal de `ng build`. Rutas relativas a src/config o dist/config.
+ */
+const DEFAULT_SITE_DIR = [
+  fileURLToPath(new URL('../../sitio/browser', import.meta.url)),
+  fileURLToPath(new URL('../../../frontend/dist/frontend/browser', import.meta.url)),
+].find((dir) => existsSync(path.join(dir, 'index.html'))) ?? fileURLToPath(new URL('../../sitio/browser', import.meta.url));
 
 const EnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
