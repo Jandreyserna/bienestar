@@ -1,0 +1,95 @@
+<header class="admin-header">
+  <div>
+    <a class="back-link" routerLink="/admin/cartillas">← Cartillas</a>
+    <h1>{{ isNew() ? 'Nueva cartilla' : 'Editar cartilla' }}</h1>
+  </div>
+</header>
+
+@if (!isNew() && worksheet.isLoading() && !current()) {
+  <p class="state">Cargando cartilla…</p>
+} @else if (!isNew() && worksheet.error()) {
+  <div class="state">
+    <p>No se encontró la cartilla.</p>
+    <a class="btn btn-ghost" routerLink="/admin/cartillas">Volver</a>
+  </div>
+} @else {
+  <form class="card panel" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    @if (error(); as message) {
+      <div class="alert alert-error" role="alert">{{ message }}</div>
+    }
+
+    <div class="field">
+      <label for="title">Título</label>
+      <input id="title" formControlName="title" placeholder="Ej. Aprendo a escuchar" />
+      @if (invalid('title')) {
+        <span class="field-error">El título es obligatorio.</span>
+      }
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="humanValue">Valor humano</label>
+        <input id="humanValue" formControlName="humanValue" list="values" placeholder="Ej. Respeto" />
+        <datalist id="values">
+          @for (value of suggestions; track value) {
+            <option [value]="value"></option>
+          }
+        </datalist>
+        @if (invalid('humanValue')) {
+          <span class="field-error">Indica el valor que trabaja la cartilla.</span>
+        }
+      </div>
+      <div class="field">
+        <label for="level">Sección</label>
+        <select id="level" formControlName="level">
+          @for (level of levels; track level[0]) {
+            <option [value]="level[0]">{{ level[1] }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="description">Descripción breve</label>
+      <textarea id="description" formControlName="description" rows="4"
+        placeholder="¿Qué actividades incluye y para qué sirve?"></textarea>
+      @if (invalid('description')) {
+        <span class="field-error">La descripción es obligatoria (máx. 2000 caracteres).</span>
+      }
+    </div>
+
+    <div class="field">
+      <label for="file">Archivo {{ isNew() ? '' : '(opcional: solo si quieres reemplazarlo)' }}</label>
+      @if (current(); as w) {
+        <span class="hint">Actual: <a [href]="w.file.url" target="_blank" rel="noopener">{{ w.file.name }}</a> ({{ formatBytes(w.file.sizeBytes) }})</span>
+      }
+      <input id="file" type="file" [accept]="accept" (change)="onFile($event)" />
+      <span class="hint">PDF, Word o PowerPoint, máximo 20 MB. Se guarda en el hosting de Hostinger.</span>
+      @if (file(); as f) {
+        <span class="hint">Seleccionado: <strong>{{ f.name }}</strong> ({{ formatBytes(f.size) }})</span>
+      }
+      @if (fileError(); as message) {
+        <span class="field-error" role="alert">{{ message }}</span>
+      }
+    </div>
+
+    @if (progress() !== null) {
+      <div class="field" aria-live="polite">
+        <span class="hint">
+          {{ progress()! < 100 ? 'Subiendo archivo… ' + progress() + '%' : 'Archivo recibido; transfiriendo al almacenamiento…' }}
+        </span>
+        <div class="progress" role="progressbar" aria-label="Progreso de carga"
+          [attr.aria-valuenow]="progress()" aria-valuemin="0" aria-valuemax="100">
+          <span [style.width.%]="progress()"></span>
+        </div>
+      </div>
+    }
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit" [disabled]="progress() !== null">
+        {{ progress() !== null ? 'Guardando…' : isNew() ? 'Publicar cartilla' : 'Guardar cambios' }}
+      </button>
+      <a class="btn btn-ghost" routerLink="/admin/cartillas">Cancelar</a>
+    </div>
+  </form>
+}

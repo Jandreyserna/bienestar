@@ -1,0 +1,115 @@
+@if (firstLoad()) {
+  <div class="container loading" aria-busy="true" aria-label="Cargando contenido">
+    <div class="skeleton" style="height: 420px"></div>
+    <div class="skeleton" style="height: 260px; margin-top: 2rem"></div>
+  </div>
+} @else if (errorMessage(); as message) {
+  <div class="container state">
+    <p>{{ message }}</p>
+    <button class="btn btn-ghost" type="button" (click)="sections.reload()">Reintentar</button>
+  </div>
+} @else {
+  <!-- Portada -->
+  @if (hero(); as hero) {
+    <section class="hero" [class.has-image]="!!hero.imageUrl">
+      @if (hero.imageUrl) {
+        <img class="hero-image" [src]="hero.imageUrl" alt="" fetchpriority="high" />
+      }
+      <div class="container hero-content">
+        <span class="eyebrow">Educación en valores</span>
+        <h1>{{ hero.title }}</h1>
+        @if (hero.subtitle) {
+          <p class="hero-subtitle">{{ hero.subtitle }}</p>
+        }
+        @if (hero.body) {
+          <p class="hero-body pre-line">{{ hero.body }}</p>
+        }
+        <div class="hero-actions">
+          <a class="btn btn-accent" routerLink="/valores-humanos">Ver cartillas de trabajo</a>
+          <a class="btn btn-ghost on-dark" routerLink="/" fragment="historia">Conoce nuestra historia</a>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Historia -->
+  @if (history(); as history) {
+    <section class="page-section" id="historia">
+      <div class="container">
+        <div class="section-heading">
+          <span class="eyebrow">{{ history.subtitle || 'Historia' }}</span>
+          <h2>{{ history.title }}</h2>
+          @if (history.body) {
+            <p class="lead pre-line">{{ history.body }}</p>
+          }
+        </div>
+        @if (history.items.length) {
+          <app-carousel [slides]="history.items" variant="story" label="Historia" [autoplayMs]="7000" />
+        } @else {
+          <p class="muted">Pronto compartiremos nuestra historia.</p>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- Fundadores -->
+  @if (founders(); as founders) {
+    <section class="page-section founders" id="fundadores">
+      <div class="container">
+        <div class="section-heading centered">
+          <span class="eyebrow">{{ founders.subtitle || 'Fundadores' }}</span>
+          <h2>{{ founders.title }}</h2>
+          @if (founders.body) {
+            <p class="lead pre-line">{{ founders.body }}</p>
+          }
+        </div>
+        @if (founders.items.length) {
+          <app-carousel [slides]="founders.items" variant="portrait" label="Fundadores" />
+        } @else {
+          <p class="muted centered-text">Muy pronto presentaremos a nuestros fundadores.</p>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- Misión y visión -->
+  @if (missionVision(); as mv) {
+    <section class="page-section" id="mision-vision">
+      <div class="container">
+        <div class="section-heading">
+          <span class="eyebrow">{{ mv.subtitle || 'Propósito' }}</span>
+          <h2>{{ mv.title }}</h2>
+          @if (mv.body) {
+            <p class="lead pre-line">{{ mv.body }}</p>
+          }
+        </div>
+        <div class="purpose-grid">
+          @for (item of mv.items; track item.id; let even = $even) {
+            <article class="card purpose">
+              <span class="purpose-icon" aria-hidden="true">
+                @if (even) {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" />
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                  </svg>
+                } @else {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                    <path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 5v3M5.6 8.6l1.8 1.8M18.4 8.6l-1.8 1.8" />
+                  </svg>
+                }
+              </span>
+              <h3>{{ item.title }}</h3>
+              @if (item.description) {
+                <p class="pre-line">{{ item.description }}</p>
+              }
+            </article>
+          }
+        </div>
+      </div>
+    </section>
+  }
+
+  @for (section of extras(); track section.id) {
+    <app-generic-section [section]="section" />
+  }
+}

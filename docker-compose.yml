@@ -1,0 +1,41 @@
+# Desarrollo local:
+#   docker compose up -d db          -> solo MySQL (y corres el backend con `npm run dev`)
+#   docker compose up -d --build     -> MySQL + API
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: bienestar_moral
+      MYSQL_USER: bienestar
+      MYSQL_PASSWORD: bienestar
+      MYSQL_ROOT_PASSWORD: root-solo-desarrollo
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-ubienestar", "-pbienestar"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file: ./backend/.env
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+    ports:
+      - "3000:3000"
+    volumes:
+      - backend-storage:/app/storage
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:
+  backend-storage:

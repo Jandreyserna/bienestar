@@ -1,0 +1,133 @@
+@let p = profile();
+
+<header class="admin-header">
+  <div>
+    <a class="back" routerLink="/admin/secciones" [queryParams]="{ pagina: form.controls.page.value }">← Secciones</a>
+    <h1>{{ isNew() ? 'Nueva sección' : (loaded()?.title ?? 'Editar sección') }}</h1>
+    @if (!isNew()) {
+      <p class="muted">{{ p.hint }}</p>
+    }
+  </div>
+</header>
+
+@if (!isNew() && section.isLoading() && !loaded()) {
+  <p class="state">Cargando sección…</p>
+} @else if (!isNew() && section.error()) {
+  <div class="state">
+    <p>No se encontró la sección.</p>
+    <a class="btn btn-ghost" routerLink="/admin/secciones">Volver</a>
+  </div>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+    @if (notice(); as n) {
+      <div class="alert" [class.alert-success]="n.type === 'success'" [class.alert-error]="n.type === 'error'" role="status">
+        {{ n.text }}
+      </div>
+    }
+
+    <section class="card panel">
+      <h2 class="panel-title">Contenido</h2>
+
+      @if (isNew()) {
+        <div class="form-grid">
+          <div class="field">
+            <label for="page">Página</label>
+            <select id="page" formControlName="page">
+              @for (page of pages; track page.slug) {
+                <option [value]="page.slug">{{ page.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="key">Clave</label>
+            <input id="key" formControlName="key" placeholder="aliados" />
+            @if (invalid(form.controls.key)) {
+              <span class="field-error">Usa minúsculas, números y guiones (ej. "nuestros-aliados").</span>
+            } @else {
+              <span class="hint">Identificador único en la página. No se puede cambiar después.</span>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="field">
+        <label for="title">Título</label>
+        <input id="title" formControlName="title" />
+        @if (invalid(form.controls.title)) {
+          <span class="field-error">El título es obligatorio (máx. 200 caracteres).</span>
+        }
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="subtitle">Subtítulo <span class="muted">(opcional)</span></label>
+          <input id="subtitle" formControlName="subtitle" />
+        </div>
+        <div class="field">
+          <label for="position">Orden en la página</label>
+          <input id="position" type="number" min="0" formControlName="position" placeholder="Al final" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="body">Texto <span class="muted">(opcional)</span></label>
+        <textarea id="body" formControlName="body" rows="4"></textarea>
+        <span class="hint">Los saltos de línea se respetan en el sitio.</span>
+      </div>
+
+      @if (p.usesImage) {
+        <app-image-field formControlName="imageUrl" label="Imagen de la sección" [hint]="p.imageHint" />
+      }
+    </section>
+
+    @if (p.usesItems) {
+      <section class="card panel" formArrayName="items">
+        <div class="items-head">
+          <h2 class="panel-title">{{ p.itemLabelPlural }} <span class="count">{{ items.length }}</span></h2>
+          <button class="btn btn-ghost btn-sm" type="button" [disabled]="items.length >= maxItems" (click)="addItem()">
+            + Agregar {{ p.itemLabel.toLowerCase() }}
+          </button>
+        </div>
+
+        @for (item of items.controls; track item; let i = $index, first = $first, last = $last) {
+          <fieldset class="item" [formGroupName]="i">
+            <legend>{{ p.itemLabel }} {{ i + 1 }}</legend>
+            <div class="item-tools">
+              <button class="icon-btn" type="button" [disabled]="first" (click)="moveItem(i, -1)"
+                [attr.aria-label]="'Subir ' + p.itemLabel + ' ' + (i + 1)">↑</button>
+              <button class="icon-btn" type="button" [disabled]="last" (click)="moveItem(i, 1)"
+                [attr.aria-label]="'Bajar ' + p.itemLabel + ' ' + (i + 1)">↓</button>
+              <button class="btn btn-danger btn-sm" type="button" (click)="removeItem(i)">Quitar</button>
+            </div>
+
+            <div class="field">
+              <label [for]="'item-title-' + i">{{ p.itemTitleLabel }}</label>
+              <input [id]="'item-title-' + i" formControlName="title" />
+              @if (invalid(item.controls.title)) {
+                <span class="field-error">Este campo es obligatorio.</span>
+              }
+            </div>
+            <div class="field">
+              <label [for]="'item-desc-' + i">{{ p.itemDescriptionLabel }}</label>
+              <textarea [id]="'item-desc-' + i" formControlName="description" rows="3"></textarea>
+            </div>
+            @if (p.itemUsesImage) {
+              <app-image-field formControlName="imageUrl" [label]="p.itemImageLabel" />
+            }
+          </fieldset>
+        } @empty {
+          <p class="state">Aún no hay elementos. Usa “Agregar”.</p>
+        }
+      </section>
+    }
+
+    <div class="form-actions sticky-actions">
+      <button class="btn btn-primary" type="submit" [disabled]="saving()">
+        {{ saving() ? 'Guardando…' : isNew() ? 'Crear sección' : 'Guardar cambios' }}
+      </button>
+      @if (form.dirty && !saving()) {
+        <span class="muted">Tienes cambios sin guardar.</span>
+      }
+    </div>
+  </form>
+}

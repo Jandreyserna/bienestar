@@ -7,3 +7,6 @@
 
 # Variables de entorno
 **/.env
+
+# Archivos subidos y caché de descargas del backend
+backend/storage/
